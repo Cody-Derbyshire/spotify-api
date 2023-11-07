@@ -22,3 +22,6 @@
 button {
   border-radius: 10rem;
 }
+.icon {
+  max-width: 1.5rem;
+}

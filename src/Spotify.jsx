@@ -1,4 +1,9 @@
 import { useState, useEffect } from 'react';
+import React from 'react';
+import Play from './assets/play.png';
+import Pause from './assets/pause.png';
+import Next from './assets/forward.png';
+import Back from './assets/back.png';
 import './App.css';
 import axios from 'axios';
 
@@ -12,8 +17,15 @@ const SCOPE =
 const App = () => {
   const [token, setToken] = useState('');
   const [user, setUser] = useState([]);
-  const [searchKey, setSearchKey] = useState('');
   const [playback, setPlayback] = useState('');
+  const [progress_ms, setProgress_ms] = useState('');
+  const [song_name, setSong_name] = useState('');
+  const [artist_name, setArtist_name] = useState('');
+  const [album_name, setAlbum_name] = useState('');
+  const [album_art, setAlbum_art] = useState('');
+  const [uri, setUri] = useState('');
+  const [duration_ms, setDuration_ms] = useState('');
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     const hash = window.location.hash;
@@ -39,31 +51,32 @@ const App = () => {
 
     setToken(token);
 
-    const getMe = async () => {
-      const { data } = await axios.get('https://api.spotify.com/v1/me', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const userData = await data;
-      console.log(userData);
-      setUser(userData);
-    };
-    getMe();
+    const fetchData = async () => {
+      try {
+        const [userData, playbackData] = await Promise.all([
+          axios.get('https://api.spotify.com/v1/me', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          axios.get('https://api.spotify.com/v1/me/player', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+        ]);
 
-    const getPlayback = async () => {
-      const { data } = await axios.get('https://api.spotify.com/v1/me/player', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const playbackData = await data;
-      console.log(playbackData);
-      setPlayback(playbackData);
-      console.log(playback.device.id);
+        setUser(userData.data);
+        setPlayback(playbackData.data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
     };
-    getPlayback();
-  }, []);
+
+    if (token) {
+      fetchData();
+    }
+  }, [token, playback]);
 
   const logout = () => {
     setToken('');
@@ -77,9 +90,10 @@ const App = () => {
       },
     });
     const userData = await data;
-    console.log(userData);
+
     setUser(userData);
   };
+
   const getPlayback = async () => {
     const { data } = await axios.get('https://api.spotify.com/v1/me/player', {
       headers: {
@@ -87,9 +101,13 @@ const App = () => {
       },
     });
     const playbackData = await data;
-    console.log(playbackData);
 
     setPlayback(playbackData);
+  };
+
+  const logData = () => {
+    console.log(playback);
+    console.log(user);
   };
 
   const pausePlayback = async () => {
@@ -99,7 +117,39 @@ const App = () => {
       headers: { Authorization: `Bearer ${token}` },
     });
     const pauseData = await data;
-    console.log(pauseData);
+    /* console.log(pauseData); */
+    console.log(playback.progress_ms);
+    console.log(playback.item?.duration_ms);
+    console.log(playback.item?.name);
+    console.log(playback.item?.artists?.[0]?.name);
+    console.log(playback.item?.album?.name);
+    console.log(playback.item?.album?.images?.[0]?.url);
+    console.log(playback.item?.uri);
+    console.log(playback.is_playing);
+
+    setProgress_ms(playback.progress_ms);
+    setDuration_ms(playback.item?.duration_ms);
+    setSong_name(playback.item?.name);
+    setArtist_name(playback.item?.artists?.[0]?.name);
+    setAlbum_name(playback.item?.album?.name);
+    setAlbum_art(playback.item?.album?.images?.[0]?.url);
+    setUri(playback.item?.uri);
+    setIsPlaying(playback.is_playing);
+  };
+
+  const playPlayback = async () => {
+    const { data } = await axios({
+      method: 'put',
+      url: `https://api.spotify.com/v1/me/player/play?device_id=${playback.device.id}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      data: {
+        position_ms: `${progress_ms}`,
+      },
+    });
+    setIsPlaying(playback.is_playing);
   };
 
   const nextTrack = async () => {
@@ -109,7 +159,8 @@ const App = () => {
       headers: { Authorization: `Bearer ${token}` },
     });
     const nextData = await data;
-    console.log(nextData);
+    /* console.log(nextData); */
+    getPlayback();
     getPlayback();
   };
   const prevTrack = async () => {
@@ -119,7 +170,8 @@ const App = () => {
       headers: { Authorization: `Bearer ${token}` },
     });
     const prevData = await data;
-    console.log(prevData);
+    /* console.log(prevData); */
+    getPlayback();
     getPlayback();
   };
 
@@ -150,12 +202,6 @@ const App = () => {
           <p>{user.display_name}</p>
         </div>
       ) : null}
-      {/* {token ? (
-        <div>
-          <button onClick={getMe}>load user</button>
-          {user ? <button onClick={getPlayback}>load player</button> : null}
-        </div>
-      ) : null} */}
 
       {token && playback ? (
         <p>
@@ -163,11 +209,32 @@ const App = () => {
           <strong> {playback.item.artists[0].name}</strong>
         </p>
       ) : null}
-      {token && playback ? <button onClick={prevTrack}>&larr;</button> : null}
-      {token && playback ? (
-        <button onClick={pausePlayback}>pause</button>
-      ) : null}
-      {token && playback ? <button onClick={nextTrack}>&rarr;</button> : null}
+      <div className='flex-row'>
+        {token && playback ? (
+          <button onClick={prevTrack}>
+            <img className='icon' src={Back} alt='' />
+          </button>
+        ) : null}
+        {token && playback ? (
+          <div>
+            {playback.is_playing ? (
+              <button onClick={pausePlayback}>
+                <img className='icon' src={Pause} alt='' />
+              </button>
+            ) : (
+              <button onClick={playPlayback}>
+                <img className='icon' src={Play} alt='' />
+              </button>
+            )}
+          </div>
+        ) : null}
+        {token && playback ? (
+          <button onClick={nextTrack}>
+            <img className='icon' src={Next} alt='' />
+          </button>
+        ) : null}
+        {user && playback ? <button onClick={logData}>?</button> : null}
+      </div>
     </div>
   );
 };
