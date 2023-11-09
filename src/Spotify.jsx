@@ -9,7 +9,7 @@ const REDIRECT_URI = 'http://localhost:5173';
 const AUTH_ENDPOINT = 'https://accounts.spotify.com/authorize';
 const RESPONSE_TYPE = 'token';
 const SCOPE =
-  'user-read-playback-state user-modify-playback-state user-read-currently-playing streaming user-library-read user-library-modify ugc-image-upload app-remote-control playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public user-follow-modify user-follow-read user-read-playback-position user-top-read user-read-recently-played user-library-modify user-library-read user-read-email user-read-private ';
+  'user-read-playback-state user-modify-playback-state user-read-currently-playing streaming  user-read-playback-position  user-read-email user-read-private ';
 
 const icon = {
   pause: (
@@ -56,7 +56,7 @@ const icon = {
 
 const App = () => {
   const [token, setToken] = useState('');
-  const [user, setUser] = useState([]);
+  const [user, setUser] = useState('');
   const [playback, setPlayback] = useState('');
   const [progress_ms, setProgress_ms] = useState('');
   const [song_name, setSong_name] = useState('');
@@ -66,8 +66,6 @@ const App = () => {
   const [uri, setUri] = useState('');
   const [duration_ms, setDuration_ms] = useState('');
   const [isPlaying, setIsPlaying] = useState(false);
-  const [artist, setArtist] = useState([]);
-  const [artistId, setArtistId] = useState('');
 
   useEffect(() => {
     const hash = window.location.hash;
@@ -125,7 +123,7 @@ const App = () => {
     if (token) {
       fetchData();
     }
-  }, [token, playback]);
+  }, [token, playback, user]);
 
   const logout = () => {
     setToken('');
@@ -225,27 +223,26 @@ const App = () => {
           <a
             href={`${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=${SCOPE}`}
           >
-            <button>login to spotify</button>
+            <button>login to spotify ↗</button>
           </a>
         </div>
       ) : (
-        <div className='flex-row'>
+        <div className='flex-row-header header'>
           {token && user ? (
-            <div className='flex-row'>
+            <div>
               {user.images && user.images.length > 0 ? (
-                <img src={user.images?.[0].url} alt='' />
+                <img className='user-img' src={user.images?.[0].url} alt='' />
               ) : null}
             </div>
           ) : null}
           <h1>reactify</h1>
           <button onClick={logout}>
-            <motion.div
+            <motion.img
               initial={{ rotate: -360 }}
               whileHover={{ rotate: 0 }}
               transition={{ type: 'spring' }}
-            >
-              {icon.exit}
-            </motion.div>
+              src='https://img.icons8.com/ios-glyphs/20/FFFFFF/so-so.png'
+            />
           </button>
         </div>
       )}

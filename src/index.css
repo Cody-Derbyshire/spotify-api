@@ -1,17 +1,40 @@
-:root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@font-face {
+  font-family: space-light;
+  src: url('./assets/fonts/SpaceGrotesk-Light.ttf');
+}
+@font-face {
+  font-family: space-regular;
+  src: url('./assets/fonts/SpaceGrotesk-Regular.ttf');
+}
+@font-face {
+  font-family: space-medium;
+  src: url('./assets/fonts/SpaceGrotesk-Medium.ttf');
+}
+@font-face {
+  font-family: space-semibold;
+  src: url('./assets/fonts/SpaceGrotesk-SemiBold.ttf');
+}
+@font-face {
+  font-family: space-bold;
+  src: url('./assets/fonts/SpaceGrotesk-Bold.ttf');
+}
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+:root {
+  font-family: space-regular, system-ui, Avenir, Helvetica, Arial, sans-serif;
+
+  color: #ffffffde;
+
+  background: #242424 url(https://grainy-gradients.vercel.app/noise.svg);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 a {
@@ -19,7 +42,6 @@ a {
 }
 
 body {
-  margin: 0;
   display: flex;
   place-items: center;
   min-width: 320px;
@@ -28,8 +50,10 @@ body {
 
 h1 {
   font-size: 3.2em;
-  line-height: 1.1;
-  filter: drop-shadow(0.25rem 0.25rem 0 #1db954);
+  margin-block-start: 0;
+  margin-block-end: 0;
+  font-family: space-bold;
+  filter: drop-shadow(0.2rem 0.2rem 0 #1db954);
 }
 
 button {
@@ -42,13 +66,9 @@ button {
   background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
+  color: #ffffffde;
 }
 button:hover {
-  /* border-color: #646cff; */
   background-color: #1db954;
   transition: background-color 0.5s;
 }
-/* button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-} */
